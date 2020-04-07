@@ -1,0 +1,13 @@
+{
+    "python.formatting.provider": "yapf",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.pyc": true,
+        "**/__pycache__": true
+    },
+    "python.pythonPath": "C:\Users\riad9\.virtualenvs\INF8225-Project-T55GekaD\Scripts\python.exe"
+}
