@@ -39,9 +39,13 @@ class GameGrid(object):
 
         # Spawn 2 elements randomly in the grid. Either a "2" or "4"
         x, y = get_random_grid_element_coords()
-        self.elements[x][y] = random.choice([2, 4])  # TODO: Make it 90% chance to be a 2 (original game)
-        x, y = get_random_grid_element_coords()
-        self.elements[x][y] = random.choice([2, 4])
+        self.elements[x][y] = 2 if random.random() < 0.9 else 4
+
+        while True:
+            x2, y2 = get_random_grid_element_coords()
+            if x2 != x or y2 != y:
+                self.elements[x2][y2] = 2 if random.random() < 0.9 else 4
+                break
 
     def do_move(self, direction: MoveDirection):
         if direction == MoveDirection.BOTTOM:
