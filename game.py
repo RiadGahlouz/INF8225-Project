@@ -57,6 +57,22 @@ class GameGrid(object):
         elif direction == MoveDirection.RIGHT:
             self.__move_horizontal(1)
         # TODO: Spawn a new element (I think it's 50% chance 2, 50% chances 4)
+        number_to_spawn = 2 # TODO Allow spawning 4s
+
+        number_of_zeros = 0
+        for row in self.elements:
+            for item in row:
+                if item == 0:
+                    number_of_zeros += 1
+        if number_of_zeros != 0:
+            while True:
+                x = random.randrange(0, 4)
+                y = random.randrange(0, 4)
+                if self.elements[y][x] == 0:
+                    self.elements[y][x] = number_to_spawn
+                    break
+        else:
+            pass # TODO : perdre la partie
 
     def __move_horizontal(self, dir_x: int):
         # Idea: When we move horiszontally, we have 4 independent rows.
