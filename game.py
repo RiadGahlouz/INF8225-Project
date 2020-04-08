@@ -19,11 +19,26 @@ class GameGrid(object):
 
         # Spawn 2 elements randomly in the grid. Either a "2" or "4"
         x, y = get_random_grid_element_coords()
-        self.elements[x][y] = random.choice([2, 4])
+        self.elements[x][y] = random.choice([2, 4])  # TODO: Make it 90% chance to be a 2 (original game)
         x, y = get_random_grid_element_coords()
         self.elements[x][y] = random.choice([2, 4])
 
     def do_move(self, direction: MoveDirection):
+        if direction == MoveDirection.BOTTOM:
+            self.__move_vertical(1)
+        elif direction == MoveDirection.TOP:
+            self.__move_vertical(-1)
+        elif direction == MoveDirection.LEFT:
+            self.__move_horizontal(-1)
+        elif direction == MoveDirection.RIGHT:
+            self.__move_horizontal(1)
+
+    def __move_horizontal(self, dir_x: int):
+        # TODO
+        pass
+
+    def __move_vertical(self, dir_y: int):
+        # TODO
         pass
 
     def get_elements(self) -> [[int]]:

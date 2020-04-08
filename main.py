@@ -20,7 +20,7 @@ def render_game_grid(window, font, grid: game.GameGrid):
                                          BLOCK_WIDTH, BLOCK_WIDTH))
             text = font.render(str(col), True, (255, 255, 255))
             window.blit(text, (rect_x + (float(BLOCK_WIDTH) / 2) - float(text.get_width()) / 2,
-                        rect_y + (float(BLOCK_WIDTH) / 2) - float(text.get_height()) / 2))
+                               rect_y + (float(BLOCK_WIDTH) / 2) - float(text.get_height()) / 2))
 
 
 if __name__ == "__main__":
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     font = pygame.font.Font(None, 24)
 
     window = pygame.display.set_mode(
-        ((BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING , (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING))
+        ((BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING, (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING))
     pygame.display.set_caption("2048 NEAT Game")
     game_grid = game.GameGrid()
 
