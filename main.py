@@ -43,5 +43,13 @@ if __name__ == "__main__":
                 running = False
             if evt.type == pygame.KEYDOWN and evt.key == pygame.K_q:
                 running = False
+            if evt.type == pygame.KEYDOWN and (evt.key == pygame.K_a or evt.key == pygame.K_LEFT):
+                game_grid.do_move(game.MoveDirection.LEFT)
+            if evt.type == pygame.KEYDOWN and (evt.key == pygame.K_d or evt.key == pygame.K_RIGHT):
+                game_grid.do_move(game.MoveDirection.RIGHT)
+            if evt.type == pygame.KEYDOWN and (evt.key == pygame.K_w or evt.key == pygame.K_UP):
+                game_grid.do_move(game.MoveDirection.UP)
+            if evt.type == pygame.KEYDOWN and (evt.key == pygame.K_s or evt.key == pygame.K_DOWN):
+                game_grid.do_move(game.MoveDirection.DOWN)
         render_game_grid(window, font, game_grid)
         pygame.display.flip()

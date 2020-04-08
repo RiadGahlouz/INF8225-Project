@@ -18,9 +18,9 @@ COLOR_DICT = {
 
 class MoveDirection(Enum):
     LEFT = 0
-    TOP = 1
+    UP = 1
     RIGHT = 2
-    BOTTOM = 3
+    DOWN = 3
 
 
 def get_random_grid_element_coords() -> (int, int):
@@ -39,31 +39,83 @@ class GameGrid(object):
 
         # Spawn 2 elements randomly in the grid. Either a "2" or "4"
         x, y = get_random_grid_element_coords()
-        self.elements[x][y] = 2 if random.random() < 0.9 else 4
+        self.elements[y][x] = 2 if random.random() < 0.9 else 4
 
         while True:
             x2, y2 = get_random_grid_element_coords()
             if x2 != x or y2 != y:
-                self.elements[x2][y2] = 2 if random.random() < 0.9 else 4
+                self.elements[y2][x2] = 2 if random.random() < 0.9 else 4
                 break
 
     def do_move(self, direction: MoveDirection):
-        if direction == MoveDirection.BOTTOM:
+        if direction == MoveDirection.DOWN:
             self.__move_vertical(1)
-        elif direction == MoveDirection.TOP:
+        elif direction == MoveDirection.UP:
             self.__move_vertical(-1)
         elif direction == MoveDirection.LEFT:
             self.__move_horizontal(-1)
         elif direction == MoveDirection.RIGHT:
             self.__move_horizontal(1)
+        # TODO: Spawn a new element (I think it's 50% chance 2, 50% chances 4)
 
     def __move_horizontal(self, dir_x: int):
-        # TODO
+        # Idea: When we move horiszontally, we have 4 independent rows.
+        # Each row moves exacly the same way, so they can be processed in //
+
+        # Row index corresponds to the y coord in our array
+        rows = [
+            self.elements[0],
+            self.elements[1],
+            self.elements[2],
+            self.elements[3],
+        ]
+
+        for row in rows:
+            # Always move towards 0, the row will be flipped if the dir is negative
+            for i in range(1, 4):
+                if row[i] == 0:
+                    continue # We can't move a non-existing element
+                for target in range(i - 1, -1, -1):
+                    print(f"Attempting to move {i} to {target}")
+                # If we reach here
+            pass
+
+        self.elements[0] = rows[0]
+        self.elements[1] = rows[1]
+        self.elements[2] = rows[2]
+        self.elements[3] = rows[3]
         pass
 
     def __move_vertical(self, dir_y: int):
-        # TODO
-        pass
+        # Step 1: Merge tiles
+            # if we move up, we start from row 0
+            # if we move down, we start from row 3
+            # 
+            # if elem[y][x] == elem[y - dir_y][x] # Go against the direction for lookup
+            #   elem[y][x] *= 2
+            #   elem[y + dir_y][x] = 0
+        
+        # TEST - UP
+        for y in range(0, len(self.elements) - 1, -dir_y):
+            for x in range(len(self.elements[y])):
+                # Go against the direction for lookup
+                if self.elements[y][x] == self.elements[y - dir_y][x]:
+                    self.elements[y][x] *= 2
+                    self.elements[y - dir_y][x] = 0
+
+        # Step 2: Move tiles
+
+        for y in range(0, len(self.elements) - 1, -dir_y):
+            for x in range(len(self.elements[y])):
+                if self.elements[y][x] != 0:
+                    continue
+
+                for y2 in range(y, len(self.elements) - 1, -dir_y):
+                    if self.elements[y2][x] != 0:
+                        self.elements[y][x] = self.elements[y2][x]
+                        self.elements[y2][x] = 0
+                        y = y2
+                        break
 
     def get_elements(self) -> [[int]]:
         return self.elements
