@@ -74,7 +74,7 @@ class GameGrid(object):
             # Always move towards 0, the row will be flipped if the dir is negative
             for i in range(1, 4):
                 if row[i] == 0:
-                    continue # We can't move a non-existing element
+                    continue  # We can't move a non-existing element
                 for target in range(i - 1, -1, -1):
                     print(f"Attempting to move {i} to {target}")
                 # If we reach here
@@ -88,34 +88,48 @@ class GameGrid(object):
 
     def __move_vertical(self, dir_y: int):
         # Step 1: Merge tiles
-            # if we move up, we start from row 0
-            # if we move down, we start from row 3
-            # 
-            # if elem[y][x] == elem[y - dir_y][x] # Go against the direction for lookup
-            #   elem[y][x] *= 2
-            #   elem[y + dir_y][x] = 0
-        
-        # TEST - UP
-        for y in range(0, len(self.elements) - 1, -dir_y):
+        # if we move up, we start from row 0
+        # if we move down, we start from row 3
+        #
+        # if elem[y][x] == elem[y - dir_y][x] # Go against the direction for lookup
+        #   elem[y][x] *= 2
+        #   elem[y + dir_y][x] = 0
+
+        def move_tiles():
+            for x in range(len(self.elements[0])):
+                col = []
+                rng2 = range(0, len(self.elements))
+                if dir_y == 1:
+                    rng2 = reversed(rng2)
+                rng2 = [k for k in rng2]
+                for y in rng2:
+                    if self.elements[y][x] != 0:
+                        col.append(self.elements[y][x])
+                        self.elements[y][x] = 0
+                # print(f"Column {x}: {col}")
+
+                for y in rng2:
+                    # print(f"Placing element at {y}")
+                    if len(col) == 0:
+                        break
+                    self.elements[y][x] = col.pop()
+
+        move_tiles()
+
+        rng = range(0, len(self.elements))
+        if dir_y == 1:
+            rng = reversed(rng)
+        rng = [x for x in rng][:-1]
+
+        for y in rng:
             for x in range(len(self.elements[y])):
                 # Go against the direction for lookup
+                # print((x,y))
                 if self.elements[y][x] == self.elements[y - dir_y][x]:
                     self.elements[y][x] *= 2
                     self.elements[y - dir_y][x] = 0
 
-        # Step 2: Move tiles
-
-        for y in range(0, len(self.elements) - 1, -dir_y):
-            for x in range(len(self.elements[y])):
-                if self.elements[y][x] != 0:
-                    continue
-
-                for y2 in range(y, len(self.elements) - 1, -dir_y):
-                    if self.elements[y2][x] != 0:
-                        self.elements[y][x] = self.elements[y2][x]
-                        self.elements[y2][x] = 0
-                        y = y2
-                        break
+        move_tiles()
 
     def get_elements(self) -> [[int]]:
         return self.elements
