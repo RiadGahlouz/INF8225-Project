@@ -48,6 +48,7 @@ class GameGrid(object):
                 break
 
     def do_move(self, direction: MoveDirection):
+        before = [row[:] for row in self.elements]
         if direction == MoveDirection.DOWN:
             self.__move_vertical(1)
         elif direction == MoveDirection.UP:
@@ -56,8 +57,12 @@ class GameGrid(object):
             self.__move_horizontal(-1)
         elif direction == MoveDirection.RIGHT:
             self.__move_horizontal(1)
+
+        if before == self.elements:  # No move has been performed
+            return
+
         # TODO: Spawn a new element (I think it's 50% chance 2, 50% chances 4)
-        number_to_spawn = 2 # TODO Allow spawning 4s
+        number_to_spawn = 2  # TODO Allow spawning 4s
 
         number_of_zeros = 0
         for row in self.elements:
@@ -72,80 +77,92 @@ class GameGrid(object):
                     self.elements[y][x] = number_to_spawn
                     break
         else:
-            pass # TODO : perdre la partie
+            pass  # TODO : perdre la partie
 
     def __move_horizontal(self, dir_x: int):
-        # Idea: When we move horiszontally, we have 4 independent rows.
-        # Each row moves exacly the same way, so they can be processed in //
-
-        # Row index corresponds to the y coord in our array
-        rows = [
-            self.elements[0],
-            self.elements[1],
-            self.elements[2],
-            self.elements[3],
-        ]
-
-        for row in rows:
-            # Always move towards 0, the row will be flipped if the dir is negative
-            for i in range(1, 4):
-                if row[i] == 0:
-                    continue  # We can't move a non-existing element
-                for target in range(i - 1, -1, -1):
-                    print(f"Attempting to move {i} to {target}")
-                # If we reach here
-            pass
-
-        self.elements[0] = rows[0]
-        self.elements[1] = rows[1]
-        self.elements[2] = rows[2]
-        self.elements[3] = rows[3]
-        pass
-
-    def __move_vertical(self, dir_y: int):
-        # Step 1: Merge tiles
-        # if we move up, we start from row 0
-        # if we move down, we start from row 3
-        #
-        # if elem[y][x] == elem[y - dir_y][x] # Go against the direction for lookup
-        #   elem[y][x] *= 2
-        #   elem[y + dir_y][x] = 0
 
         def move_tiles():
-            for x in range(len(self.elements[0])):
+            for y_h in range(len(self.elements[0])):
+                row = []
+                rng2 = range(0, len(self.elements))
+                if dir_x == 1:
+                    rng2 = reversed(rng2)
+                rng2 = [k for k in rng2]
+                for x_h in rng2:
+                    if self.elements[y_h][x_h] != 0:
+                        row.append(self.elements[y_h][x_h])
+                        self.elements[y_h][x_h] = 0
+
+                for x__h in rng2:
+                    if len(row) == 0:
+                        break
+                    self.elements[y_h][x__h] = row.pop()
+
+        move_tiles()
+
+        rng = range(0, len(self.elements))
+        if dir_x == 1:
+            rng = reversed(rng)
+        rng = [k for k in rng][:-1]
+
+        for xh in reversed(rng):
+            for yh in range(len(self.elements[0])):
+                if self.elements[yh][xh] != 0 and self.elements[yh][xh] == self.elements[yh][xh - dir_x]:
+                    self.elements[yh][xh] *= 2
+                    self.elements[yh][xh - dir_x] = 0
+
+        move_tiles()
+
+    def __move_vertical(self, dir_y: int):
+        def move_tiles():
+            for x_v in range(len(self.elements[0])):
                 col = []
                 rng2 = range(0, len(self.elements))
                 if dir_y == 1:
                     rng2 = reversed(rng2)
                 rng2 = [k for k in rng2]
-                for y in rng2:
-                    if self.elements[y][x] != 0:
-                        col.append(self.elements[y][x])
-                        self.elements[y][x] = 0
-                # print(f"Column {x}: {col}")
+                for y_v in rng2:
+                    if self.elements[y_v][x_v] != 0:
+                        col.append(self.elements[y_v][x_v])
+                        self.elements[y_v][x_v] = 0
 
-                for y in rng2:
-                    # print(f"Placing element at {y}")
+                for y__v in rng2:
                     if len(col) == 0:
                         break
-                    self.elements[y][x] = col.pop()
+                    self.elements[y__v][x_v] = col.pop()
 
         move_tiles()
 
         rng = range(0, len(self.elements))
         if dir_y == 1:
             rng = reversed(rng)
-        rng = [x for x in rng][:-1]
+        rng = [k_ for k_ in rng][:-1]
 
-        for y in rng:
-            for x in range(len(self.elements[y])):
+        for yv in reversed(rng):
+            for xv in range(len(self.elements[yv])):
                 # Go against the direction for lookup
                 # print((x,y))
-                if self.elements[y][x] == self.elements[y - dir_y][x]:
-                    self.elements[y][x] *= 2
-                    self.elements[y - dir_y][x] = 0
+                if self.elements[yv][xv] != 0 and self.elements[yv][xv] == self.elements[yv - dir_y][xv]:
+                    self.elements[yv][xv] *= 2
+                    self.elements[yv - dir_y][xv] = 0
 
         move_tiles()
+
+    def is_game_over(self) -> bool:
+        for y_go, row in enumerate(self.elements):
+            for x_go, col in enumerate(row):
+                # Check value
+                val = self.elements[y_go][x_go]
+                if val == 0:
+                    return False
+
+                # Check surroundings
+                if (x_go > 0 and self.elements[y_go][x_go - 1] == val) \
+                        or (x_go < len(self.elements) - 1 and self.elements[y_go][x_go + 1] == val) \
+                        or (y_go > 0 and self.elements[y_go - 1][x_go] == val) \
+                        or (y_go < len(self.elements) - 1 and self.elements[y_go + 1][x_go] == val):
+                    return False
+        return True
 
     def get_elements(self) -> [[int]]:
         return self.elements
