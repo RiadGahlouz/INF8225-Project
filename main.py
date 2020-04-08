@@ -28,7 +28,15 @@ def render_game_grid(window, font, grid: game.GameGrid):
 
 if __name__ == "__main__":
     pygame.init()
+    clock = pygame.time.Clock()
     font = pygame.font.Font("fonts/ClearSans-Bold.ttf", 32)
+
+
+    def update_fps():
+        fps = str(int(clock.get_fps()))
+        fps_text = font.render(fps, 1, pygame.Color("coral"))
+        return fps_text
+
 
     window = pygame.display.set_mode(
         ((BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING, (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING))
@@ -52,4 +60,7 @@ if __name__ == "__main__":
             if evt.type == pygame.KEYDOWN and (evt.key == pygame.K_s or evt.key == pygame.K_DOWN):
                 game_grid.do_move(game.MoveDirection.DOWN)
         render_game_grid(window, font, game_grid)
+        window.blit(update_fps(), (10, 0))
+        clock.tick(60)
         pygame.display.flip()
+        # pygame.display.update()
