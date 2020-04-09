@@ -1,5 +1,6 @@
 import pygame
 import game
+import rustgame
 import random
 
 BLOCK_SPACING = 10
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     window = pygame.display.set_mode(
         ((BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING, (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING))
     pygame.display.set_caption("2048 NEAT Game")
-    game_grid = game.GameGrid()
+    game_grid = rustgame.GameGrid()
 
     running = True
     window.fill((187, 173, 160))  # TODO: Move this in the loop if we do move animations for the numbers
