@@ -8,6 +8,7 @@ pylint = "*"
 
 [packages]
 pygame = "*"
+neat-python = "*"
 
 [requires]
 python_version = "3.8"
