@@ -1,6 +1,7 @@
 import pygame
 import game
 import random
+import time
 
 BLOCK_SPACING = 10
 BLOCK_WIDTH = 80
@@ -63,4 +64,7 @@ if __name__ == "__main__":
         window.blit(update_fps(), (10, 0))
         clock.tick(60)
         pygame.display.flip()
+        if game_grid.is_game_over():
+            time.sleep(5)
+            raise SystemExit(0)
         # pygame.display.update()
