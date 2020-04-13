@@ -105,12 +105,14 @@ class GameGrid(object):
             rng = reversed(rng)
         rng = [k for k in rng][:-1]
 
-        for xh in reversed(rng):
+        for xh in (rng):
             for yh in range(len(self.elements[0])):
-                if self.elements[yh][xh] != 0 and self.elements[yh][xh] == self.elements[yh][xh - dir_x]:
+                print((xh, yh), " =? ", (xh - dir_x, yh))
+                if self.elements[yh][xh] != 0 and self.elements[yh][xh] == self.elements[yh][ xh - dir_x]:
                     self.elements[yh][xh] *= 2
                     self.elements[yh][xh - dir_x] = 0
 
+        print("><><><>><><><><><><><")
         move_tiles()
 
     def __move_vertical(self, dir_y: int):
@@ -138,7 +140,7 @@ class GameGrid(object):
             rng = reversed(rng)
         rng = [k_ for k_ in rng][:-1]
 
-        for yv in reversed(rng):
+        for yv in (rng):
             for xv in range(len(self.elements[yv])):
                 # Go against the direction for lookup
                 # print((x,y))
