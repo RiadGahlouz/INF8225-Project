@@ -107,7 +107,6 @@ class GameGrid(object):
 
         for xh in (rng):
             for yh in range(len(self.elements[0])):
-                print((xh, yh), " =? ", (xh - dir_x, yh))
                 if self.elements[yh][xh] != 0 and self.elements[yh][xh] == self.elements[yh][ xh - dir_x]:
                     self.elements[yh][xh] *= 2
                     self.elements[yh][xh - dir_x] = 0
