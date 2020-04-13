@@ -9,5 +9,4 @@
         "**/*.pyc": true,
         "**/__pycache__": true
     },
-    "python.pythonPath": "C:\Users\riad9\.virtualenvs\INF8225-Project-T55GekaD\Scripts\python.exe"
 }

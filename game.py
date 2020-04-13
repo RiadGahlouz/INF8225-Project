@@ -79,24 +79,14 @@ class GameGrid(object):
         else:
             pass  # TODO : perdre la partie
 
+
     def __move_horizontal(self, dir_x: int):
 
         def move_tiles():
-            for y_h in range(len(self.elements[0])):
-                row = []
-                rng2 = range(0, len(self.elements))
-                if dir_x == 1:
-                    rng2 = reversed(rng2)
-                rng2 = [k for k in rng2]
-                for x_h in rng2:
-                    if self.elements[y_h][x_h] != 0:
-                        row.append(self.elements[y_h][x_h])
-                        self.elements[y_h][x_h] = 0
-
-                for x__h in rng2:
-                    if len(row) == 0:
-                        break
-                    self.elements[y_h][x__h] = row.pop()
+            for yh in range(0, len(self.elements)):
+                tmp =  list(filter(lambda a: a != 0, self.elements[yh]))
+                missing_zero = [0] * (len(self.elements) - len(tmp))
+                self.elements[yh] = tmp + missing_zero if  dir_x == -1 else  missing_zero + tmp
 
         move_tiles()
 
@@ -108,29 +98,28 @@ class GameGrid(object):
         for xh in (rng):
             for yh in range(len(self.elements[0])):
                 if self.elements[yh][xh] != 0 and self.elements[yh][xh] == self.elements[yh][ xh - dir_x]:
+                    # print((xh,yh), [self.elements[yh][xh] ], " =? ", (xh-dir_x,yh),[self.elements[yh][ xh - dir_x]  ] )
                     self.elements[yh][xh] *= 2
                     self.elements[yh][xh - dir_x] = 0
 
-        print("><><><>><><><><><><><")
         move_tiles()
 
     def __move_vertical(self, dir_y: int):
         def move_tiles():
-            for x_v in range(len(self.elements[0])):
-                col = []
+            for xv in range(len(self.elements)):
                 rng2 = range(0, len(self.elements))
                 if dir_y == 1:
                     rng2 = reversed(rng2)
                 rng2 = [k for k in rng2]
-                for y_v in rng2:
-                    if self.elements[y_v][x_v] != 0:
-                        col.append(self.elements[y_v][x_v])
-                        self.elements[y_v][x_v] = 0
+                for yv, r in enumerate(rng2):
+                    if self.elements[r][xv] != 0: continue
 
-                for y__v in rng2:
-                    if len(col) == 0:
-                        break
-                    self.elements[y__v][x_v] = col.pop()
+                    for yyv in rng2[yv:]:
+                        if self.elements[yyv][xv] != 0: 
+                            self.elements[r][xv] = self.elements[yyv][xv]
+                            self.elements[yyv][xv] = 0
+                            break
+
 
         move_tiles()
 
@@ -142,10 +131,11 @@ class GameGrid(object):
         for yv in (rng):
             for xv in range(len(self.elements[yv])):
                 # Go against the direction for lookup
-                # print((x,y))
                 if self.elements[yv][xv] != 0 and self.elements[yv][xv] == self.elements[yv - dir_y][xv]:
+                    # print((xv,yv), [self.elements[yv][xv] ], " =? ", (xv,yv-dir_y), [self.elements[yv - dir_y][xv]])
                     self.elements[yv][xv] *= 2
                     self.elements[yv - dir_y][xv] = 0
+
 
         move_tiles()
 
