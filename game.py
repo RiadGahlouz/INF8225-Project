@@ -59,7 +59,7 @@ class GameGrid(object):
             self.__move_horizontal(1)
 
         if before == self.elements:  # No move has been performed
-            return
+            return False
 
         # TODO: Spawn a new element (I think it's 50% chance 2, 50% chances 4)
         number_to_spawn = 2  # TODO Allow spawning 4s
@@ -78,6 +78,7 @@ class GameGrid(object):
                     break
         else:
             pass  # TODO : perdre la partie
+        return True
 
 
     def __move_horizontal(self, dir_x: int):

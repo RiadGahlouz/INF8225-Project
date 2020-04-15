@@ -2,9 +2,57 @@ import pygame
 import game
 import random
 import time
+import neat
+import os
+import math
 
 BLOCK_SPACING = 10
 BLOCK_WIDTH = 80
+
+def get_config_file_path():
+    return os.path.join(os.path.dirname(__file__), 'neat-config')
+
+def load_config():
+    return neat.Config(neat.DefaultGenome, neat.DefaultReproduction, 
+                       neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                       get_config_file_path())
+
+def eval_genomes(genomes, config):
+    for genome_id, genome in genomes:
+        genome.fitness = 0
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        game_grid = game.GameGrid()
+        invalid_moves_in_a_row = 0
+        while not game_grid.is_game_over() and invalid_moves_in_a_row < 10:
+            inputs = []
+            for row in game_grid.get_elements():
+                for val in row:
+                    inputs.append(val)
+            move_one_hot = net.activate(inputs)
+            move = game.MoveDirection(move_one_hot.index(min(move_one_hot)))
+            valid_move = game_grid.do_move(move)
+
+            # TODO Make legit fitness
+            if valid_move:
+                genome.fitness += 1.0
+                invalid_moves_in_a_row = 0
+            else:
+                invalid_moves_in_a_row += 1
+        
+def run():
+    # Create the population, which is the top-level object for a NEAT run.
+    p = neat.Population(load_config())
+
+    # Add a stdout reporter to show progress in the terminal.
+    p.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    p.add_reporter(stats)
+
+    # Run for 300 generations.
+    p.run(eval_genomes, 300)
+    visualize.plot_stats(stats, ylog=False, view=True)
+    visualize.plot_species(stats, view=True)
+
 
 
 def render_game_grid(window, font, grid: game.GameGrid):
@@ -28,6 +76,9 @@ def render_game_grid(window, font, grid: game.GameGrid):
 
 
 if __name__ == "__main__":
+    run()
+
+if __name__ == "__main_":
     pygame.init()
     clock = pygame.time.Clock()
     font = pygame.font.Font("fonts/ClearSans-Bold.ttf", 32)
