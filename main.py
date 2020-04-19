@@ -5,6 +5,7 @@ import time
 import neat
 import os
 import math
+import visualize
 
 BLOCK_SPACING = 10
 BLOCK_WIDTH = 80
