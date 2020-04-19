@@ -35,7 +35,7 @@ def eval_genomes(genomes, config):
 
             # TODO Make legit fitness
             if valid_move:
-                genome.fitness += 1.0
+                genome.fitness = game_grid.get_total_score() # 1.0
                 invalid_moves_in_a_row = 0
             else:
                 invalid_moves_in_a_row += 1

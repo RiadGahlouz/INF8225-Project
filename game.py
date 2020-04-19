@@ -47,6 +47,12 @@ class GameGrid(object):
                 self.elements[y2][x2] = 2 if random.random() < 0.9 else 4
                 break
 
+    def get_total_score(self):
+        score = 0
+        for e in self.elements:
+            score += sum(e)
+        return score
+
     def do_move(self, direction: MoveDirection):
         before = [row[:] for row in self.elements]
         if direction == MoveDirection.DOWN:
@@ -158,3 +164,4 @@ class GameGrid(object):
 
     def get_elements(self) -> [[int]]:
         return self.elements
+
