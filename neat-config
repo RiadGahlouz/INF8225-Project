@@ -2,17 +2,17 @@
 
 [NEAT]
 fitness_criterion     = max
-fitness_threshold     = 3.9
-no_fitness_termination = True
-pop_size = 25
+fitness_threshold     = 4096
+no_fitness_termination = False
+pop_size = 300
 reset_on_extinction = False
 
 
 [DefaultGenome]
 # node activation options
 activation_default      = sigmoid
-activation_mutate_rate  = 0.0
-activation_options      = sigmoid
+activation_mutate_rate  = 0.05
+activation_options      = sigmoid relu softplus tanh gauss identity abs sin square inv hat exp cube clamped
 
 # node aggregation options
 aggregation_default     = sum
@@ -38,13 +38,13 @@ conn_delete_prob        = 0.5
 
 # connection enable options
 enabled_default         = True
-enabled_mutate_rate     = 0.01
+enabled_mutate_rate     = 0.05
 
 feed_forward            = True
 initial_connection      = full
 
 # node add/remove rates
-node_add_prob           = 0.2
+node_add_prob           = 0.4
 node_delete_prob        = 0.2
 
 # network parameters
@@ -79,5 +79,5 @@ max_stagnation       = 20
 species_elitism      = 2
 
 [DefaultReproduction]
-elitism            = 2
+elitism            = 4
 survival_threshold = 0.2

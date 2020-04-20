@@ -49,8 +49,14 @@ class GameGrid(object):
 
     def get_total_score(self):
         score = 0
-        for e in self.elements:
-            score += sum(e)
+        high_score = 0
+        r_W = 1.0
+        for r in self.elements:
+            score += sum( list(filter(lambda a: a > 4, r))) /r_W
+            for c in r:
+                if c > high_score: high_score = c
+            r_W -= 0.2
+
         return score
 
     def do_move(self, direction: MoveDirection):

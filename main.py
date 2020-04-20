@@ -39,6 +39,8 @@ def eval_genomes(genomes, config):
                 invalid_moves_in_a_row = 0
             else:
                 invalid_moves_in_a_row += 1
+
+    
         
 def run():
     # Create the population, which is the top-level object for a NEAT run.
@@ -50,9 +52,53 @@ def run():
     p.add_reporter(stats)
 
     # Run for 300 generations.
-    p.run(eval_genomes, 300)
+    winner = p.run(eval_genomes, 300)
+    print('\nBest genome:\n{!s}'.format(winner))
+    # render_winner_game(winner, )
+    
     visualize.plot_stats(stats, ylog=False, view=True)
     visualize.plot_species(stats, view=True)
+
+def render_winner_game(winner ):
+    pass
+    pygame.init()
+    clock = pygame.time.Clock()
+    font = pygame.font.Font("fonts/ClearSans-Bold.ttf", 32)
+
+
+    def update_fps():
+        fps = str(int(clock.get_fps()))
+        fps_text = font.render(fps, 1, pygame.Color("coral"))
+        return fps_text
+
+
+    window = pygame.display.set_mode(
+        ((BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING, (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING))
+    pygame.display.set_caption("2048 NEAT Game")
+    game_grid = game.GameGrid()
+
+    running = True
+    window.fill((187, 173, 160))  # TODO: Move this in the loop if we do move animations for the numbers
+    winner_net = neat.nn.FeedForwardNetwork.create(winner, load_config())
+    invalid_moves_in_a_row = 0
+    while not game_grid.is_game_over() and invalid_moves_in_a_row < 10:
+        inputs = []
+        for row in game_grid.get_elements():
+            for val in row:
+                inputs.append(val)
+        move_one_hot = winner_net.activate(inputs)
+        move = game.MoveDirection(move_one_hot.index(min(move_one_hot)))
+        valid_move = game_grid.do_move(move)
+
+        render_game_grid(window, font, game_grid)
+        window.blit(update_fps(), (10, 0))
+        clock.tick(60)
+        pygame.display.flip()
+        if game_grid.is_game_over()  and invalid_moves_in_a_row < 10:
+            # pass
+            raise SystemExit(0)
+        # time.sleep(1)
+        
 
 
 
