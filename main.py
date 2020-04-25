@@ -1,3 +1,4 @@
+import argparse
 import pygame
 import game
 import random
@@ -51,9 +52,11 @@ def eval_genomes(genomes, config):
 
     
         
-def run():
+def run(args):
     # Create the population, which is the top-level object for a NEAT run.
     p = neat.Population(load_config())
+    if args.load is not None:
+        p = neat.checkpoint.Checkpointer.restore_checkpoint(args.load)
 
     # Add a stdout reporter to show progress in the terminal.
     p.add_reporter(neat.StdOutReporter(True))
@@ -62,8 +65,14 @@ def run():
     graph_reporter = GraphReporter(stats)
     p.add_reporter(graph_reporter)
 
-    # Run for 300 generations.
-    winner = p.run(eval_genomes, SETTINGS['GENERATIONS'])
+    saver = neat.checkpoint.Checkpointer(generation_interval=None, time_interval_seconds=None, filename_prefix=args.save)
+    p.add_reporter(saver)
+
+    # Run for at least 1 generations.
+    generations_to_run = max(SETTINGS['GENERATIONS'] - p.generation, 1)
+    winner = p.run(eval_genomes, generations_to_run)
+    if args.save is not None:
+        saver.save_checkpoint(p.config, p.population, p.species, p.generation)
     graph_reporter.close()
 
     print('\nBest genome:\n{!s}'.format(winner))
@@ -148,10 +157,7 @@ def render_game_grid(window, font, grid: game.GameGrid, data: {}):
                                rect_y + (float(BLOCK_WIDTH) / 2) - float(text.get_height()) / 2))
 
 
-if __name__ == "__main__":
-    run()
-
-if __name__ == "__main_":
+def play():
     pygame.init()
     clock = pygame.time.Clock()
     font = pygame.font.Font("fonts/ClearSans-Bold.ttf", 32)
@@ -192,3 +198,16 @@ if __name__ == "__main_":
             time.sleep(5)
             raise SystemExit(0)
         # pygame.display.update()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='NEAT that play 2048.')
+    parser.add_argument('-p', '--play', action='store_true', help='Play the NEAT game yourself')
+    parser.add_argument('-l', '--load', help='Load a checkpoint to resume the simulation')
+    parser.add_argument('-s', '--save', help='Load a checkpoint to resume the simulation')
+
+    args = parser.parse_args()
+    if args.play:
+        play()
+    else:
+        run(args)
