@@ -9,6 +9,14 @@ import visualize
 
 BLOCK_SPACING = 10
 BLOCK_WIDTH = 80
+SETTINGS = {}
+SETTINGS['WINDOW_WIDTH'] = (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING + 500
+SETTINGS['WINDOW_HEIGTH'] = (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING
+SETTINGS['GENERATIONS'] = 100
+SETTINGS['DEFAULT_STEP_DELAY'] = 1
+
+COLORS = {}
+COLORS["GREY"] = (77, 77, 77)
 
 def get_config_file_path():
     return os.path.join(os.path.dirname(__file__), 'neat-config')
@@ -52,18 +60,19 @@ def run():
     p.add_reporter(stats)
 
     # Run for 300 generations.
-    winner = p.run(eval_genomes, 300)
+    winner = p.run(eval_genomes, SETTINGS['GENERATIONS'])
     print('\nBest genome:\n{!s}'.format(winner))
-    # render_winner_game(winner, )
+    render_game_with_NN(winner)
     
     visualize.plot_stats(stats, ylog=False, view=True)
     visualize.plot_species(stats, view=True)
 
-def render_winner_game(winner ):
-    pass
+def render_game_with_NN(nn_param ):
     pygame.init()
     clock = pygame.time.Clock()
     font = pygame.font.Font("fonts/ClearSans-Bold.ttf", 32)
+    step_delay = SETTINGS['DEFAULT_STEP_DELAY']
+
 
 
     def update_fps():
@@ -72,38 +81,49 @@ def render_winner_game(winner ):
         return fps_text
 
 
-    window = pygame.display.set_mode(
-        ((BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING, (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING))
+    window = pygame.display.set_mode((SETTINGS['WINDOW_WIDTH'], SETTINGS['WINDOW_HEIGTH']))
     pygame.display.set_caption("2048 NEAT Game")
     game_grid = game.GameGrid()
 
     running = True
-    window.fill((187, 173, 160))  # TODO: Move this in the loop if we do move animations for the numbers
-    winner_net = neat.nn.FeedForwardNetwork.create(winner, load_config())
+    nn = neat.nn.FeedForwardNetwork.create(nn_param, load_config())
     invalid_moves_in_a_row = 0
     while not game_grid.is_game_over() and invalid_moves_in_a_row < 10:
         inputs = []
         for row in game_grid.get_elements():
             for val in row:
                 inputs.append(val)
-        move_one_hot = winner_net.activate(inputs)
+        move_one_hot = nn.activate(inputs)
         move = game.MoveDirection(move_one_hot.index(min(move_one_hot)))
         valid_move = game_grid.do_move(move)
+        invalid_moves_in_a_row += 0 if valid_move else 1
 
-        render_game_grid(window, font, game_grid)
+        render_game_grid(window, font, game_grid, 
+            {"nb_invalid_move": invalid_moves_in_a_row,
+             "step_delay": step_delay})
         window.blit(update_fps(), (10, 0))
         clock.tick(60)
         pygame.display.flip()
         if game_grid.is_game_over()  and invalid_moves_in_a_row < 10:
-            # pass
             raise SystemExit(0)
-        # time.sleep(1)
+
+        for evt in pygame.event.get():
+            if evt.type == pygame.KEYDOWN and evt.key == pygame.K_SPACE:
+                step_delay -= 0.2 if step_delay > 0 else 0
+            elif evt.type == pygame.KEYDOWN and evt.key != pygame.K_SPACE:
+                step_delay = SETTINGS['DEFAULT_STEP_DELAY']
+        time.sleep(step_delay)
         
 
 
 
-def render_game_grid(window, font, grid: game.GameGrid):
+def render_game_grid(window, font, grid: game.GameGrid, data: {}):
+    window.fill((187, 173, 160))  # TODO: Move this in the loop if we do move animations for the numbers
     elements = grid.get_elements()
+
+    window.blit(pygame.font.SysFont("arial", 32).render("Generation size: " + str(SETTINGS['GENERATIONS']), 1, COLORS["GREY"]), ( 375, 8))
+    window.blit(pygame.font.SysFont("arial", 32).render("Nb invalid move: " + str(data['nb_invalid_move']), 1, COLORS["GREY"]), ( 375, 40))
+    window.blit(pygame.font.SysFont("arial", 32).render("Step delay: " + str(data['step_delay']), 1, COLORS["GREY"]), ( 375, 72))
 
     for y, row in enumerate(elements):
         for x, col in enumerate(row):
