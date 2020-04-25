@@ -109,9 +109,7 @@ def render_game_with_NN(nn_param ):
 
         for evt in pygame.event.get():
             if evt.type == pygame.KEYDOWN and evt.key == pygame.K_SPACE:
-                step_delay -= 0.2 if step_delay > 0 else 0
-            elif evt.type == pygame.KEYDOWN and evt.key != pygame.K_SPACE:
-                step_delay = SETTINGS['DEFAULT_STEP_DELAY']
+                step_delay -= 0.2 if step_delay - 0.2 > 0 else 0
         time.sleep(step_delay)
         
 
@@ -122,8 +120,9 @@ def render_game_grid(window, font, grid: game.GameGrid, data: {}):
     elements = grid.get_elements()
 
     window.blit(pygame.font.SysFont("arial", 32).render("Generation size: " + str(SETTINGS['GENERATIONS']), 1, COLORS["GREY"]), ( 375, 8))
-    window.blit(pygame.font.SysFont("arial", 32).render("Nb invalid move: " + str(data['nb_invalid_move']), 1, COLORS["GREY"]), ( 375, 40))
-    window.blit(pygame.font.SysFont("arial", 32).render("Step delay: " + str(data['step_delay']), 1, COLORS["GREY"]), ( 375, 72))
+    window.blit(pygame.font.SysFont("arial", 32).render("Score: " + str(grid.get_highscore()), 1, COLORS["GREY"]), ( 375, 40))
+    window.blit(pygame.font.SysFont("arial", 32).render("Nb invalid move: " + str(data['nb_invalid_move']), 1, COLORS["GREY"]), ( 375, 72))
+    window.blit(pygame.font.SysFont("arial", 32).render("Step delay: " + str(float("{:.2f}".format(data['step_delay']))), 1, COLORS["GREY"]), ( 375, 104))
 
     for y, row in enumerate(elements):
         for x, col in enumerate(row):

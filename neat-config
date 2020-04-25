@@ -4,7 +4,7 @@
 fitness_criterion     = max
 fitness_threshold     = 4096
 no_fitness_termination = False
-pop_size = 20
+pop_size = 300
 reset_on_extinction = False
 
 

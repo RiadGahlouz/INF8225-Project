@@ -59,6 +59,14 @@ class GameGrid(object):
 
         return score
 
+    def get_highscore(self): 
+        tiles = []
+        for e in self.elements:
+            tiles += e
+        tiles.sort(reverse=True)
+
+        return tiles[0] 
+
     def do_move(self, direction: MoveDirection):
         before = [row[:] for row in self.elements]
         if direction == MoveDirection.DOWN:
