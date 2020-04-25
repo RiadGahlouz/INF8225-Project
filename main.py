@@ -6,6 +6,7 @@ import neat
 import os
 import math
 import visualize
+from graph_reporter import GraphReporter
 
 BLOCK_SPACING = 10
 BLOCK_WIDTH = 80
@@ -58,9 +59,13 @@ def run():
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
+    graph_reporter = GraphReporter(stats)
+    p.add_reporter(graph_reporter)
 
     # Run for 300 generations.
     winner = p.run(eval_genomes, SETTINGS['GENERATIONS'])
+    graph_reporter.close()
+
     print('\nBest genome:\n{!s}'.format(winner))
     render_game_with_NN(winner)
     
