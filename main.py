@@ -6,6 +6,7 @@ import neat
 import os
 import math
 import visualize
+from graph_reporter import GraphReporter
 
 BLOCK_SPACING = 10
 BLOCK_WIDTH = 80
@@ -43,7 +44,7 @@ def eval_genomes(genomes, config):
 
             # TODO Make legit fitness
             if valid_move:
-                genome.fitness = game_grid.get_std_score #game_grid.get_total_score() - invalid_moves_in_a_row * 10 # 1.0
+                genome.fitness = game_grid.get_total_score() - invalid_moves_in_a_row * 10 # 1.0
                 invalid_moves_in_a_row = 0
             else:
                 invalid_moves_in_a_row += 1
@@ -58,9 +59,13 @@ def run():
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
+    graph_reporter = GraphReporter(stats)
+    p.add_reporter(graph_reporter)
 
     # Run for 300 generations.
     winner = p.run(eval_genomes, SETTINGS['GENERATIONS'])
+    graph_reporter.close()
+
     print('\nBest genome:\n{!s}'.format(winner))
     render_game_with_NN(winner)
     
@@ -108,10 +113,10 @@ def render_game_with_NN(nn_param ):
             raise SystemExit(0)
 
         for evt in pygame.event.get():
-            if evt.type == pygame.KEYDOWN and evt.key == pygame.K_SPACE:
-                step_delay -= 0.2 if step_delay > 0 else 0
-            elif evt.type == pygame.KEYDOWN and evt.key != pygame.K_SPACE:
-                step_delay = SETTINGS['DEFAULT_STEP_DELAY']
+            if evt.type == pygame.QUIT:
+                raise SystemExit(0)
+            elif evt.type == pygame.KEYDOWN and evt.key == pygame.K_SPACE:
+                step_delay -= 0.2 if step_delay - 0.2 > 0 else 0
         time.sleep(step_delay)
         
 
@@ -122,8 +127,9 @@ def render_game_grid(window, font, grid: game.GameGrid, data: {}):
     elements = grid.get_elements()
 
     window.blit(pygame.font.SysFont("arial", 32).render("Generation size: " + str(SETTINGS['GENERATIONS']), 1, COLORS["GREY"]), ( 375, 8))
-    window.blit(pygame.font.SysFont("arial", 32).render("Nb invalid move: " + str(data['nb_invalid_move']), 1, COLORS["GREY"]), ( 375, 40))
-    window.blit(pygame.font.SysFont("arial", 32).render("Step delay: " + str(data['step_delay']), 1, COLORS["GREY"]), ( 375, 72))
+    window.blit(pygame.font.SysFont("arial", 32).render("Score: " + str(grid.get_highscore()), 1, COLORS["GREY"]), ( 375, 40))
+    window.blit(pygame.font.SysFont("arial", 32).render("Nb invalid move: " + str(data['nb_invalid_move']), 1, COLORS["GREY"]), ( 375, 72))
+    window.blit(pygame.font.SysFont("arial", 32).render("Step delay: " + str(float("{:.2f}".format(data['step_delay']))), 1, COLORS["GREY"]), ( 375, 104))
 
     for y, row in enumerate(elements):
         for x, col in enumerate(row):
