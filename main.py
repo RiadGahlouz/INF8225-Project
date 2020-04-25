@@ -12,7 +12,7 @@ BLOCK_WIDTH = 80
 SETTINGS = {}
 SETTINGS['WINDOW_WIDTH'] = (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING + 500
 SETTINGS['WINDOW_HEIGTH'] = (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING
-SETTINGS['GENERATIONS'] = 100
+SETTINGS['GENERATIONS'] = 200
 SETTINGS['DEFAULT_STEP_DELAY'] = 1
 
 COLORS = {}
@@ -43,7 +43,7 @@ def eval_genomes(genomes, config):
 
             # TODO Make legit fitness
             if valid_move:
-                genome.fitness = game_grid.get_total_score() # 1.0
+                genome.fitness = game_grid.get_std_score #game_grid.get_total_score() - invalid_moves_in_a_row * 10 # 1.0
                 invalid_moves_in_a_row = 0
             else:
                 invalid_moves_in_a_row += 1

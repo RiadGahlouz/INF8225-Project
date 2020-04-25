@@ -1,5 +1,6 @@
 from enum import Enum
 import random
+import statistics
 
 COLOR_DICT = {
     2: (238, 228, 218),  # Font color: (119, 110, 101)
@@ -58,6 +59,9 @@ class GameGrid(object):
             r_W -= 0.2
 
         return score
+
+    def get_std_score(self):
+        return statistics.pstdev(c for c in r for r in self.elements)
 
     def do_move(self, direction: MoveDirection):
         before = [row[:] for row in self.elements]
