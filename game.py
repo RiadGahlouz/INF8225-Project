@@ -1,5 +1,8 @@
 from enum import Enum
 import random
+import statistics
+import math
+import copy
 
 COLOR_DICT = {
     2: (238, 228, 218),  # Font color: (119, 110, 101)
@@ -46,8 +49,78 @@ class GameGrid(object):
             if x2 != x or y2 != y:
                 self.elements[y2][x2] = 2 if random.random() < 0.9 else 4
                 break
+        self.oldElements = copy.copy(self.elements)
+
+    def get_fitness(self, gen):
+        tiles = []
+        for e in self.elements:
+            tiles += e
+
+        oldTiles = []
+        for e in self.oldElements:
+            oldTiles += e
+
+        return max(tiles) - max(oldTiles)
+        # if gen < 200:
+        #     return max(tiles)
+        # # elif 100 <= gen < 200:
+        # #     return sum(filter(lambda t: t > 4, tiles))
+        # elif 200 <= gen:
+        #     cmx = 0
+        #     cmy = 0
+        #     posx = 0
+        #     posy = 0
+        #     for j, r in enumerate(self.elements):
+        #         for i, c in enumerate(r):
+        #             if c == max(tiles):
+        #                 posx += i
+        #                 posy += j
+        #             cmx += i*c 
+        #             cmy += j*c
+
+        #     score = 0 
+        #     cmx /= 16
+        #     cmy /= 16
+        #     for j, r in enumerate(self.elements):
+        #         for i, c in enumerate(r):
+        #             w =  5.66 - math.dist([i, j], [posx, posy])
+        #             score += c * w
+        #     return score / tiles.count(max(tiles))
+
+            
+            # posx /= max_count
+            # posy /= max_count
+            # cmx /= 16
+            # cmy /= 16
+            # dist = math.dist([cmx, cmy], [posx, posy])
+            # return (1 / (dist + 1)) / max_count
+        # return sum(tiles)
+        
+
+    def get_total_score(self):
+        score = 0
+        r_W = 1.0
+        for r in self.elements:
+            score += sum( list(filter(lambda a: a > 4, r))) /r_W
+            r_W -= 0.2
+
+        return score
+
+    def get_bigest_tile_scoring(self):
+        tiles = []
+        for e in self.elements:
+            tiles += e
+        return max(tiles) / statistics.mean(tiles)
+
+    def get_highscore(self): 
+        tiles = []
+        for e in self.elements:
+            tiles += e
+
+        return max(tiles) 
 
     def do_move(self, direction: MoveDirection):
+        self.oldElements = copy.copy(self.elements)
         before = [row[:] for row in self.elements]
         if direction == MoveDirection.DOWN:
             self.__move_vertical(1)
@@ -59,7 +132,7 @@ class GameGrid(object):
             self.__move_horizontal(1)
 
         if before == self.elements:  # No move has been performed
-            return
+            return False
 
         # TODO: Spawn a new element (I think it's 50% chance 2, 50% chances 4)
         number_to_spawn = 2  # TODO Allow spawning 4s
@@ -78,25 +151,16 @@ class GameGrid(object):
                     break
         else:
             pass  # TODO : perdre la partie
+        return True
+
 
     def __move_horizontal(self, dir_x: int):
 
         def move_tiles():
-            for y_h in range(len(self.elements[0])):
-                row = []
-                rng2 = range(0, len(self.elements))
-                if dir_x == 1:
-                    rng2 = reversed(rng2)
-                rng2 = [k for k in rng2]
-                for x_h in rng2:
-                    if self.elements[y_h][x_h] != 0:
-                        row.append(self.elements[y_h][x_h])
-                        self.elements[y_h][x_h] = 0
-
-                for x__h in rng2:
-                    if len(row) == 0:
-                        break
-                    self.elements[y_h][x__h] = row.pop()
+            for yh in range(0, len(self.elements)):
+                tmp =  list(filter(lambda a: a != 0, self.elements[yh]))
+                missing_zero = [0] * (len(self.elements) - len(tmp))
+                self.elements[yh] = tmp + missing_zero if  dir_x == -1 else  missing_zero + tmp
 
         move_tiles()
 
@@ -105,9 +169,10 @@ class GameGrid(object):
             rng = reversed(rng)
         rng = [k for k in rng][:-1]
 
-        for xh in reversed(rng):
+        for xh in (rng):
             for yh in range(len(self.elements[0])):
-                if self.elements[yh][xh] != 0 and self.elements[yh][xh] == self.elements[yh][xh - dir_x]:
+                if self.elements[yh][xh] != 0 and self.elements[yh][xh] == self.elements[yh][ xh - dir_x]:
+                    # print((xh,yh), [self.elements[yh][xh] ], " =? ", (xh-dir_x,yh),[self.elements[yh][ xh - dir_x]  ] )
                     self.elements[yh][xh] *= 2
                     self.elements[yh][xh - dir_x] = 0
 
@@ -115,21 +180,20 @@ class GameGrid(object):
 
     def __move_vertical(self, dir_y: int):
         def move_tiles():
-            for x_v in range(len(self.elements[0])):
-                col = []
+            for xv in range(len(self.elements)):
                 rng2 = range(0, len(self.elements))
                 if dir_y == 1:
                     rng2 = reversed(rng2)
                 rng2 = [k for k in rng2]
-                for y_v in rng2:
-                    if self.elements[y_v][x_v] != 0:
-                        col.append(self.elements[y_v][x_v])
-                        self.elements[y_v][x_v] = 0
+                for yv, r in enumerate(rng2):
+                    if self.elements[r][xv] != 0: continue
 
-                for y__v in rng2:
-                    if len(col) == 0:
-                        break
-                    self.elements[y__v][x_v] = col.pop()
+                    for yyv in rng2[yv:]:
+                        if self.elements[yyv][xv] != 0: 
+                            self.elements[r][xv] = self.elements[yyv][xv]
+                            self.elements[yyv][xv] = 0
+                            break
+
 
         move_tiles()
 
@@ -138,13 +202,14 @@ class GameGrid(object):
             rng = reversed(rng)
         rng = [k_ for k_ in rng][:-1]
 
-        for yv in reversed(rng):
+        for yv in (rng):
             for xv in range(len(self.elements[yv])):
                 # Go against the direction for lookup
-                # print((x,y))
                 if self.elements[yv][xv] != 0 and self.elements[yv][xv] == self.elements[yv - dir_y][xv]:
+                    # print((xv,yv), [self.elements[yv][xv] ], " =? ", (xv,yv-dir_y), [self.elements[yv - dir_y][xv]])
                     self.elements[yv][xv] *= 2
                     self.elements[yv - dir_y][xv] = 0
+
 
         move_tiles()
 
@@ -166,3 +231,4 @@ class GameGrid(object):
 
     def get_elements(self) -> [[int]]:
         return self.elements
+
