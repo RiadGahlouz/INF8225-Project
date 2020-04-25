@@ -108,7 +108,9 @@ def render_game_with_NN(nn_param ):
             raise SystemExit(0)
 
         for evt in pygame.event.get():
-            if evt.type == pygame.KEYDOWN and evt.key == pygame.K_SPACE:
+            if evt.type == pygame.QUIT:
+                raise SystemExit(0)
+            elif evt.type == pygame.KEYDOWN and evt.key == pygame.K_SPACE:
                 step_delay -= 0.2 if step_delay - 0.2 > 0 else 0
         time.sleep(step_delay)
         
