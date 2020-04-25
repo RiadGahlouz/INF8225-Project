@@ -13,11 +13,14 @@ BLOCK_WIDTH = 80
 SETTINGS = {}
 SETTINGS['WINDOW_WIDTH'] = (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING + 500
 SETTINGS['WINDOW_HEIGTH'] = (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING
-SETTINGS['GENERATIONS'] = 200
+SETTINGS['GENERATIONS'] = 300
 SETTINGS['DEFAULT_STEP_DELAY'] = 1
+SETTINGS['MAX_INVALID_MOVE_IN_A_ROW'] = 10
+SETTINGS['CURRENT_GEN'] = 0
 
 COLORS = {}
 COLORS["GREY"] = (77, 77, 77)
+
 
 def get_config_file_path():
     return os.path.join(os.path.dirname(__file__), 'neat-config')
@@ -28,12 +31,13 @@ def load_config():
                        get_config_file_path())
 
 def eval_genomes(genomes, config):
+    SETTINGS['CURRENT_GEN'] += 1
     for genome_id, genome in genomes:
         genome.fitness = 0
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         game_grid = game.GameGrid()
         invalid_moves_in_a_row = 0
-        while not game_grid.is_game_over() and invalid_moves_in_a_row < 10:
+        while not game_grid.is_game_over() and invalid_moves_in_a_row < SETTINGS['MAX_INVALID_MOVE_IN_A_ROW']:
             inputs = []
             for row in game_grid.get_elements():
                 for val in row:
@@ -44,9 +48,10 @@ def eval_genomes(genomes, config):
 
             # TODO Make legit fitness
             if valid_move:
-                genome.fitness = game_grid.get_total_score() - invalid_moves_in_a_row * 10 # 1.0
+                genome.fitness = game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
                 invalid_moves_in_a_row = 0
             else:
+                # genome.fitness = 0
                 invalid_moves_in_a_row += 1
 
     
@@ -63,6 +68,7 @@ def run():
     p.add_reporter(graph_reporter)
 
     # Run for 300 generations.
+    gen_count = 0
     winner = p.run(eval_genomes, SETTINGS['GENERATIONS'])
     graph_reporter.close()
 
@@ -93,7 +99,7 @@ def render_game_with_NN(nn_param ):
     running = True
     nn = neat.nn.FeedForwardNetwork.create(nn_param, load_config())
     invalid_moves_in_a_row = 0
-    while not game_grid.is_game_over() and invalid_moves_in_a_row < 10:
+    while not game_grid.is_game_over() and invalid_moves_in_a_row < SETTINGS['MAX_INVALID_MOVE_IN_A_ROW']:
         inputs = []
         for row in game_grid.get_elements():
             for val in row:

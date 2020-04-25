@@ -1,6 +1,8 @@
 from enum import Enum
 import random
 import statistics
+import math
+import copy
 
 COLOR_DICT = {
     2: (238, 228, 218),  # Font color: (119, 110, 101)
@@ -47,31 +49,78 @@ class GameGrid(object):
             if x2 != x or y2 != y:
                 self.elements[y2][x2] = 2 if random.random() < 0.9 else 4
                 break
+        self.oldElements = copy.copy(self.elements)
+
+    def get_fitness(self, gen):
+        tiles = []
+        for e in self.elements:
+            tiles += e
+
+        oldTiles = []
+        for e in self.oldElements:
+            oldTiles += e
+
+        return max(tiles) - max(oldTiles)
+        # if gen < 200:
+        #     return max(tiles)
+        # # elif 100 <= gen < 200:
+        # #     return sum(filter(lambda t: t > 4, tiles))
+        # elif 200 <= gen:
+        #     cmx = 0
+        #     cmy = 0
+        #     posx = 0
+        #     posy = 0
+        #     for j, r in enumerate(self.elements):
+        #         for i, c in enumerate(r):
+        #             if c == max(tiles):
+        #                 posx += i
+        #                 posy += j
+        #             cmx += i*c 
+        #             cmy += j*c
+
+        #     score = 0 
+        #     cmx /= 16
+        #     cmy /= 16
+        #     for j, r in enumerate(self.elements):
+        #         for i, c in enumerate(r):
+        #             w =  5.66 - math.dist([i, j], [posx, posy])
+        #             score += c * w
+        #     return score / tiles.count(max(tiles))
+
+            
+            # posx /= max_count
+            # posy /= max_count
+            # cmx /= 16
+            # cmy /= 16
+            # dist = math.dist([cmx, cmy], [posx, posy])
+            # return (1 / (dist + 1)) / max_count
+        # return sum(tiles)
+        
 
     def get_total_score(self):
         score = 0
-        high_score = 0
         r_W = 1.0
         for r in self.elements:
             score += sum( list(filter(lambda a: a > 4, r))) /r_W
-            for c in r:
-                if c > high_score: high_score = c
             r_W -= 0.2
 
         return score
 
-    def get_std_score(self):
-        return statistics.pstdev(c for c in r for r in self.elements)
+    def get_bigest_tile_scoring(self):
+        tiles = []
+        for e in self.elements:
+            tiles += e
+        return max(tiles) / statistics.mean(tiles)
 
     def get_highscore(self): 
         tiles = []
         for e in self.elements:
             tiles += e
-        tiles.sort(reverse=True)
 
-        return tiles[0] 
+        return max(tiles) 
 
     def do_move(self, direction: MoveDirection):
+        self.oldElements = copy.copy(self.elements)
         before = [row[:] for row in self.elements]
         if direction == MoveDirection.DOWN:
             self.__move_vertical(1)
