@@ -51,50 +51,14 @@ class GameGrid(object):
                 break
         self.oldElements = copy.copy(self.elements)
 
+        self.score = 0
+
     def get_fitness(self, gen):
         tiles = []
         for e in self.elements:
             tiles += e
 
-        oldTiles = []
-        for e in self.oldElements:
-            oldTiles += e
-
-        return max(tiles) - max(oldTiles)
-        # if gen < 200:
-        #     return max(tiles)
-        # # elif 100 <= gen < 200:
-        # #     return sum(filter(lambda t: t > 4, tiles))
-        # elif 200 <= gen:
-        #     cmx = 0
-        #     cmy = 0
-        #     posx = 0
-        #     posy = 0
-        #     for j, r in enumerate(self.elements):
-        #         for i, c in enumerate(r):
-        #             if c == max(tiles):
-        #                 posx += i
-        #                 posy += j
-        #             cmx += i*c 
-        #             cmy += j*c
-
-        #     score = 0 
-        #     cmx /= 16
-        #     cmy /= 16
-        #     for j, r in enumerate(self.elements):
-        #         for i, c in enumerate(r):
-        #             w =  5.66 - math.dist([i, j], [posx, posy])
-        #             score += c * w
-        #     return score / tiles.count(max(tiles))
-
-            
-            # posx /= max_count
-            # posy /= max_count
-            # cmx /= 16
-            # cmy /= 16
-            # dist = math.dist([cmx, cmy], [posx, posy])
-            # return (1 / (dist + 1)) / max_count
-        # return sum(tiles)
+        return max(tiles)
         
 
     def get_total_score(self):
@@ -121,7 +85,6 @@ class GameGrid(object):
 
     def do_move(self, direction: MoveDirection):
         self.oldElements = copy.copy(self.elements)
-        before = [row[:] for row in self.elements]
         if direction == MoveDirection.DOWN:
             self.__move_vertical(1)
         elif direction == MoveDirection.UP:
@@ -131,7 +94,7 @@ class GameGrid(object):
         elif direction == MoveDirection.RIGHT:
             self.__move_horizontal(1)
 
-        if before == self.elements:  # No move has been performed
+        if self.oldElements == self.elements:  # No move has been performed
             return False
 
         # TODO: Spawn a new element (I think it's 50% chance 2, 50% chances 4)
@@ -176,6 +139,8 @@ class GameGrid(object):
                     self.elements[yh][xh] *= 2
                     self.elements[yh][xh - dir_x] = 0
 
+                    self.score += self.elements[yh][xh]
+
         move_tiles()
 
     def __move_vertical(self, dir_y: int):
@@ -209,6 +174,8 @@ class GameGrid(object):
                     # print((xv,yv), [self.elements[yv][xv] ], " =? ", (xv,yv-dir_y), [self.elements[yv - dir_y][xv]])
                     self.elements[yv][xv] *= 2
                     self.elements[yv - dir_y][xv] = 0
+
+                    self.score += self.elements[yv][xv]
 
 
         move_tiles()

@@ -8,6 +8,7 @@ import os
 import math
 import visualize
 from graph_reporter import GraphReporter
+import numpy as np
 
 BLOCK_SPACING = 10
 BLOCK_WIDTH = 80
@@ -18,6 +19,7 @@ SETTINGS['GENERATIONS'] = 300
 SETTINGS['DEFAULT_STEP_DELAY'] = 1
 SETTINGS['MAX_INVALID_MOVE_IN_A_ROW'] = 10
 SETTINGS['CURRENT_GEN'] = 0
+SETTINGS['NB_GAME_IN_GEN'] = 5
 
 COLORS = {}
 COLORS["GREY"] = (77, 77, 77)
@@ -36,24 +38,31 @@ def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
         genome.fitness = 0
         net = neat.nn.FeedForwardNetwork.create(genome, config)
-        game_grid = game.GameGrid()
-        invalid_moves_in_a_row = 0
-        while not game_grid.is_game_over() and invalid_moves_in_a_row < SETTINGS['MAX_INVALID_MOVE_IN_A_ROW']:
-            inputs = []
-            for row in game_grid.get_elements():
-                for val in row:
-                    inputs.append(val)
-            move_one_hot = net.activate(inputs)
-            move = game.MoveDirection(move_one_hot.index(min(move_one_hot)))
-            valid_move = game_grid.do_move(move)
 
-            # TODO Make legit fitness
-            if valid_move:
-                genome.fitness = game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
-                invalid_moves_in_a_row = 0
-            else:
-                # genome.fitness = 0
-                invalid_moves_in_a_row += 1
+        num_games = SETTINGS['NB_GAME_IN_GEN']
+        fitnesses = np.zeros(shape=(num_games,))
+
+        for i in range(num_games):
+            game_grid = game.GameGrid() 
+            invalid_moves_in_a_row = 0
+            while not game_grid.is_game_over() and invalid_moves_in_a_row < SETTINGS['MAX_INVALID_MOVE_IN_A_ROW']:
+                inputs = []
+                for row in game_grid.get_elements():
+                    for val in row:
+                        inputs.append(val)
+                move_one_hot = net.activate(inputs)
+                move = game.MoveDirection(move_one_hot.index(min(move_one_hot)))
+                valid_move = game_grid.do_move(move)
+
+                # TODO Make legit fitness
+                if valid_move:
+                    fitnesses[i] = game_grid.score # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
+                    invalid_moves_in_a_row = 0
+                else:
+                    fitnesses[i] -= 16 # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
+                    invalid_moves_in_a_row += 1
+        
+        genome.fitness = np.mean(fitnesses)
 
     
         
@@ -74,7 +83,6 @@ def run(args):
     p.add_reporter(saver)
 
     # Run for at least 1 generations.
-    gen_count = 0
     generations_to_run = max(SETTINGS['GENERATIONS'] - p.generation, 1)
     winner = p.run(eval_genomes, generations_to_run)
     if args.save is not None:
@@ -142,7 +150,7 @@ def render_game_grid(window, font, grid: game.GameGrid, data: {}):
     elements = grid.get_elements()
 
     window.blit(pygame.font.SysFont("arial", 32).render("Generation size: " + str(SETTINGS['GENERATIONS']), 1, COLORS["GREY"]), ( 375, 8))
-    window.blit(pygame.font.SysFont("arial", 32).render("Score: " + str(grid.get_highscore()), 1, COLORS["GREY"]), ( 375, 40))
+    window.blit(pygame.font.SysFont("arial", 32).render("Score: " + str(grid.score), 1, COLORS["GREY"]), ( 375, 40))
     window.blit(pygame.font.SysFont("arial", 32).render("Nb invalid move: " + str(data['nb_invalid_move']), 1, COLORS["GREY"]), ( 375, 72))
     window.blit(pygame.font.SysFont("arial", 32).render("Step delay: " + str(float("{:.2f}".format(data['step_delay']))), 1, COLORS["GREY"]), ( 375, 104))
 
