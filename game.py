@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 import random
 import statistics
 import math
@@ -19,7 +19,7 @@ COLOR_DICT = {
 }
 
 
-class MoveDirection(Enum):
+class MoveDirection(IntEnum):
     LEFT = 0
     UP = 1
     RIGHT = 2

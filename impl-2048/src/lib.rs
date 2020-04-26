@@ -22,6 +22,16 @@ impl Into<BoardState> for u64 {
     }
 }
 
+#[no_mangle]
+pub extern "C" fn move_dir(high: u32, low: u32, direction: u8) -> BoardState {
+    let directions: Vec<tfe::Direction> = vec![
+        tfe::Direction::Left,
+        tfe::Direction::Up,
+        tfe::Direction::Right,
+        tfe::Direction::Down,
+    ];
+    tfe::Game::execute(BoardState{high, low}.into(), &directions[direction as usize]).into()
+}
 
 #[no_mangle]
 pub extern "C" fn move_left(high: u32, low: u32) -> BoardState {

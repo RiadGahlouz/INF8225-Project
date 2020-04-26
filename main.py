@@ -37,7 +37,7 @@ def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
         genome.fitness = 0
         net = neat.nn.FeedForwardNetwork.create(genome, config)
-        game_grid = game.GameGrid()
+        game_grid = rustgame.GameGrid()
         invalid_moves_in_a_row = 0
         while not game_grid.is_game_over() and invalid_moves_in_a_row < SETTINGS['MAX_INVALID_MOVE_IN_A_ROW']:
             inputs = []
@@ -68,8 +68,8 @@ def run(args):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    graph_reporter = GraphReporter(stats)
-    p.add_reporter(graph_reporter)
+    # graph_reporter = GraphReporter(stats)
+    # p.add_reporter(graph_reporter)
 
     saver = neat.checkpoint.Checkpointer(generation_interval=None, time_interval_seconds=None, filename_prefix=args.save)
     p.add_reporter(saver)
@@ -80,7 +80,7 @@ def run(args):
     winner = p.run(eval_genomes, generations_to_run)
     if args.save is not None:
         saver.save_checkpoint(p.config, p.population, p.species, p.generation)
-    graph_reporter.close()
+    # graph_reporter.close()
 
     print('\nBest genome:\n{!s}'.format(winner))
     render_game_with_NN(winner)
@@ -104,7 +104,7 @@ def render_game_with_NN(nn_param ):
 
     window = pygame.display.set_mode((SETTINGS['WINDOW_WIDTH'], SETTINGS['WINDOW_HEIGTH']))
     pygame.display.set_caption("2048 NEAT Game")
-    game_grid = game.GameGrid()
+    game_grid = rustgame.GameGrid()
 
     running = True
     nn = neat.nn.FeedForwardNetwork.create(nn_param, load_config())
@@ -138,7 +138,7 @@ def render_game_with_NN(nn_param ):
 
 
 
-def render_game_grid(window, font, grid: game.GameGrid, data: {}):
+def render_game_grid(window, font, grid: rustgame.GameGrid, data: {}):
     window.fill((187, 173, 160))  # TODO: Move this in the loop if we do move animations for the numbers
     elements = grid.get_elements()
 
