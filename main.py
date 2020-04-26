@@ -20,6 +20,7 @@ SETTINGS['DEFAULT_STEP_DELAY'] = 1
 SETTINGS['MAX_INVALID_MOVE_IN_A_ROW'] = 10
 SETTINGS['CURRENT_GEN'] = 0
 SETTINGS['NB_GAME_IN_GEN'] = 5
+SETTINGS['PENALTY_FOR_INVALID_MOVE'] = 256
 
 COLORS = {}
 COLORS["GREY"] = (77, 77, 77)
@@ -52,8 +53,7 @@ def eval_genomes(genomes, config):
                     for val in row:
                         inputs.append(val)
                 move_one_hot = net.activate(inputs)
-                # print("ONEHOT")
-                # print(move_one_hot)
+                
                 move = game.MoveDirection(move_one_hot.index(max(move_one_hot)))
                 valid_move = game_grid.do_move(move)
 
@@ -62,7 +62,7 @@ def eval_genomes(genomes, config):
                     fitnesses[i] = game_grid.score # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
                     invalid_moves_in_a_row = 0
                 else:
-                    fitnesses[i] -= 16 * ( SETTINGS['CURRENT_GEN'] / SETTINGS['GENERATIONS']) # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
+                    fitnesses[i] -= SETTINGS['PENALTY_FOR_INVALID_MOVE'] * ( SETTINGS['CURRENT_GEN'] / SETTINGS['GENERATIONS']) # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
                     invalid_moves_in_a_row += 1
         
         genome.fitness = np.mean(fitnesses)
@@ -141,7 +141,7 @@ def render_game_with_NN(nn_param ):
         clock.tick(60)
         pygame.display.flip()
         if game_grid.is_game_over() and invalid_moves_in_a_row < 10:
-            raise SystemExit(0)
+            break
 
         for evt in pygame.event.get():
             if evt.type == pygame.QUIT:

@@ -61,20 +61,12 @@ class GameGrid(object):
         return max(tiles)
         
 
-    def get_total_score(self):
-        score = 0
-        r_W = 1.0
-        for r in self.elements:
-            score += sum( list(filter(lambda a: a > 4, r))) /r_W
-            r_W -= 0.2
-
-        return score
-
-    def get_bigest_tile_scoring(self):
+    def nb_of_zeros(self):
         tiles = []
         for e in self.elements:
             tiles += e
-        return max(tiles) / statistics.mean(tiles)
+
+        return  tiles.count(0)
 
     def get_highscore(self): 
         tiles = []
