@@ -1,8 +1,8 @@
 # See https://neat-python.readthedocs.io/en/latest/config_file.html
 
 [NEAT]
-fitness_criterion     = max
-fitness_threshold     = 4096
+fitness_criterion      = max
+fitness_threshold      = 4096
 no_fitness_termination = True
 pop_size = 100
 
@@ -18,7 +18,7 @@ activation_options      = sigmoid relu softplus tanh gauss identity abs sin squa
 # node aggregation options
 aggregation_default     = sum
 aggregation_mutate_rate = 0.0
-aggregation_options     = sum
+aggregation_options     = sum 
 
 # node bias options
 bias_init_mean          = 0.0
@@ -39,18 +39,19 @@ conn_delete_prob        = 0.5
 
 # connection enable options
 enabled_default         = True
-enabled_mutate_rate     = 0.05
+enabled_mutate_rate     = 0.1
 
 feed_forward            = True
-initial_connection      = full
+# initial_connection      = unconnected  
+initial_connection      = full_direct
 
 # node add/remove rates
-node_add_prob           = 0.4
+node_add_prob           = 0.4	
 node_delete_prob        = 0.2
 
 # network parameters
 num_hidden              = 0
-num_inputs              = 16
+num_inputs              = 17
 num_outputs             = 4
 
 # node response options
@@ -72,13 +73,13 @@ weight_mutate_rate      = 0.8
 weight_replace_rate     = 0.1
 
 [DefaultSpeciesSet]
-compatibility_threshold = 3.0
+compatibility_threshold = 2.5
 
 [DefaultStagnation]
 species_fitness_func = max
-max_stagnation       = 20
+max_stagnation       = 16
 species_elitism      = 2
 
 [DefaultReproduction]
-elitism            = 4
+elitism            = 3
 survival_threshold = 0.2

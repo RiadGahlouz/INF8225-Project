@@ -49,7 +49,7 @@ class GameGrid(object):
             if x2 != x or y2 != y:
                 self.elements[y2][x2] = 2 if random.random() < 0.9 else 4
                 break
-        self.oldElements = copy.copy(self.elements)
+        self.oldElements = copy.deepcopy(self.elements)
 
         self.score = 0
 
@@ -84,7 +84,7 @@ class GameGrid(object):
         return max(tiles) 
 
     def do_move(self, direction: MoveDirection):
-        self.oldElements = copy.copy(self.elements)
+        self.oldElements = copy.deepcopy(self.elements)
         if direction == MoveDirection.DOWN:
             self.__move_vertical(1)
         elif direction == MoveDirection.UP:

@@ -15,7 +15,7 @@ BLOCK_WIDTH = 80
 SETTINGS = {}
 SETTINGS['WINDOW_WIDTH'] = (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING + 500
 SETTINGS['WINDOW_HEIGTH'] = (BLOCK_SPACING + BLOCK_WIDTH) * 4 + BLOCK_SPACING
-SETTINGS['GENERATIONS'] = 300
+SETTINGS['GENERATIONS'] = 100
 SETTINGS['DEFAULT_STEP_DELAY'] = 1
 SETTINGS['MAX_INVALID_MOVE_IN_A_ROW'] = 10
 SETTINGS['CURRENT_GEN'] = 0
@@ -38,6 +38,7 @@ def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
         genome.fitness = 0
         net = neat.nn.FeedForwardNetwork.create(genome, config)
+        # net = neat.nn.RecurrentNetwork.create(genome, config)
 
         num_games = SETTINGS['NB_GAME_IN_GEN']
         fitnesses = np.zeros(shape=(num_games,))
@@ -46,12 +47,14 @@ def eval_genomes(genomes, config):
             game_grid = game.GameGrid() 
             invalid_moves_in_a_row = 0
             while not game_grid.is_game_over() and invalid_moves_in_a_row < SETTINGS['MAX_INVALID_MOVE_IN_A_ROW']:
-                inputs = []
+                inputs = [invalid_moves_in_a_row]
                 for row in game_grid.get_elements():
                     for val in row:
                         inputs.append(val)
                 move_one_hot = net.activate(inputs)
-                move = game.MoveDirection(move_one_hot.index(min(move_one_hot)))
+                # print("ONEHOT")
+                # print(move_one_hot)
+                move = game.MoveDirection(move_one_hot.index(max(move_one_hot)))
                 valid_move = game_grid.do_move(move)
 
                 # TODO Make legit fitness
@@ -59,7 +62,7 @@ def eval_genomes(genomes, config):
                     fitnesses[i] = game_grid.score # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
                     invalid_moves_in_a_row = 0
                 else:
-                    fitnesses[i] -= 16 # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
+                    fitnesses[i] -= 16 * ( SETTINGS['CURRENT_GEN'] / SETTINGS['GENERATIONS']) # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
                     invalid_moves_in_a_row += 1
         
         genome.fitness = np.mean(fitnesses)
@@ -79,7 +82,7 @@ def run(args):
     graph_reporter = GraphReporter(stats)
     p.add_reporter(graph_reporter)
 
-    saver = neat.checkpoint.Checkpointer(generation_interval=None, time_interval_seconds=None, filename_prefix=args.save)
+    saver = neat.checkpoint.Checkpointer(generation_interval=100, time_interval_seconds=None, filename_prefix=args.save)
     p.add_reporter(saver)
 
     # Run for at least 1 generations.
@@ -117,14 +120,19 @@ def render_game_with_NN(nn_param ):
     nn = neat.nn.FeedForwardNetwork.create(nn_param, load_config())
     invalid_moves_in_a_row = 0
     while not game_grid.is_game_over() and invalid_moves_in_a_row < SETTINGS['MAX_INVALID_MOVE_IN_A_ROW']:
-        inputs = []
+        inputs = [invalid_moves_in_a_row]
         for row in game_grid.get_elements():
             for val in row:
                 inputs.append(val)
         move_one_hot = nn.activate(inputs)
-        move = game.MoveDirection(move_one_hot.index(min(move_one_hot)))
+        move = game.MoveDirection(move_one_hot.index(max(move_one_hot)))
         valid_move = game_grid.do_move(move)
-        invalid_moves_in_a_row += 0 if valid_move else 1
+        # invalid_moves_in_a_row = 0 if valid_move else invalid_moves_in_a_row + 1
+
+        if valid_move:
+            invalid_moves_in_a_row = 0
+        else:
+            invalid_moves_in_a_row += 1
 
         render_game_grid(window, font, game_grid, 
             {"nb_invalid_move": invalid_moves_in_a_row,
@@ -132,7 +140,7 @@ def render_game_with_NN(nn_param ):
         window.blit(update_fps(), (10, 0))
         clock.tick(60)
         pygame.display.flip()
-        if game_grid.is_game_over()  and invalid_moves_in_a_row < 10:
+        if game_grid.is_game_over() and invalid_moves_in_a_row < 10:
             raise SystemExit(0)
 
         for evt in pygame.event.get():
