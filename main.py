@@ -153,14 +153,15 @@ def render_game_with_NN(nn_param ):
 
 
 
-def render_game_grid(window, font, grid: game.GameGrid, data: {}):
+def render_game_grid(window, font, grid: game.GameGrid, data: {} = None):
     window.fill((187, 173, 160))
     elements = grid.get_elements()
 
     window.blit(pygame.font.SysFont("arial", 32).render("Generation size: " + str(SETTINGS['GENERATIONS']), 1, COLORS["GREY"]), ( 375, 8))
     window.blit(pygame.font.SysFont("arial", 32).render("Score: " + str(grid.score), 1, COLORS["GREY"]), ( 375, 40))
-    window.blit(pygame.font.SysFont("arial", 32).render("Nb invalid move: " + str(data['nb_invalid_move']), 1, COLORS["GREY"]), ( 375, 72))
-    window.blit(pygame.font.SysFont("arial", 32).render("Step delay: " + str(float("{:.2f}".format(data['step_delay']))), 1, COLORS["GREY"]), ( 375, 104))
+    if (data is not None):
+        window.blit(pygame.font.SysFont("arial", 32).render("Nb invalid move: " + str(data['nb_invalid_move']), 1, COLORS["GREY"]), ( 375, 72))
+        window.blit(pygame.font.SysFont("arial", 32).render("Step delay: " + str(float("{:.2f}".format(data['step_delay']))), 1, COLORS["GREY"]), ( 375, 104))
 
     for y, row in enumerate(elements):
         for x, col in enumerate(row):
