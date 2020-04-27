@@ -20,7 +20,7 @@ SETTINGS['DEFAULT_STEP_DELAY'] = 1
 SETTINGS['MAX_INVALID_MOVE_IN_A_ROW'] = 10
 SETTINGS['CURRENT_GEN'] = 0
 SETTINGS['NB_GAME_IN_GEN'] = 5
-SETTINGS['PENALTY_FOR_INVALID_MOVE'] = 256
+SETTINGS['PENALTY_FOR_INVALID_MOVE'] = 2
 
 COLORS = {}
 COLORS["GREY"] = (77, 77, 77)
@@ -59,11 +59,12 @@ def eval_genomes(genomes, config):
 
                 # TODO Make legit fitness
                 if valid_move:
-                    fitnesses[i] = game_grid.score # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
+                    fitnesses[i] = game_grid.score
                     invalid_moves_in_a_row = 0
                 else:
-                    fitnesses[i] -= SETTINGS['PENALTY_FOR_INVALID_MOVE'] * ( SETTINGS['CURRENT_GEN'] / SETTINGS['GENERATIONS']) # game_grid.get_fitness(SETTINGS['CURRENT_GEN'])
                     invalid_moves_in_a_row += 1
+                    game_grid.score -= (SETTINGS['PENALTY_FOR_INVALID_MOVE'] * ( SETTINGS['CURRENT_GEN'] / SETTINGS['GENERATIONS'])) * invalid_moves_in_a_row 
+                    fitnesses[i] = game_grid.score
         
         genome.fitness = np.mean(fitnesses)
 
