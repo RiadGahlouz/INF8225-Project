@@ -89,7 +89,7 @@ class GameGrid(object):
         if self.oldElements == self.elements:  # No move has been performed
             return False
 
-        # TODO: Spawn a new element (I think it's 50% chance 2, 50% chances 4)
+        
         number_to_spawn = 2  # TODO Allow spawning 4s
 
         number_of_zeros = 0
@@ -127,7 +127,6 @@ class GameGrid(object):
         for xh in (rng):
             for yh in range(len(self.elements[0])):
                 if self.elements[yh][xh] != 0 and self.elements[yh][xh] == self.elements[yh][ xh - dir_x]:
-                    # print((xh,yh), [self.elements[yh][xh] ], " =? ", (xh-dir_x,yh),[self.elements[yh][ xh - dir_x]  ] )
                     self.elements[yh][xh] *= 2
                     self.elements[yh][xh - dir_x] = 0
 
@@ -163,7 +162,6 @@ class GameGrid(object):
             for xv in range(len(self.elements[yv])):
                 # Go against the direction for lookup
                 if self.elements[yv][xv] != 0 and self.elements[yv][xv] == self.elements[yv - dir_y][xv]:
-                    # print((xv,yv), [self.elements[yv][xv] ], " =? ", (xv,yv-dir_y), [self.elements[yv - dir_y][xv]])
                     self.elements[yv][xv] *= 2
                     self.elements[yv - dir_y][xv] = 0
 

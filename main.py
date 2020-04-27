@@ -128,7 +128,6 @@ def render_game_with_NN(nn_param ):
         move_one_hot = nn.activate(inputs)
         move = game.MoveDirection(move_one_hot.index(max(move_one_hot)))
         valid_move = game_grid.do_move(move)
-        # invalid_moves_in_a_row = 0 if valid_move else invalid_moves_in_a_row + 1
 
         if valid_move:
             invalid_moves_in_a_row = 0
@@ -155,7 +154,7 @@ def render_game_with_NN(nn_param ):
 
 
 def render_game_grid(window, font, grid: game.GameGrid, data: {}):
-    window.fill((187, 173, 160))  # TODO: Move this in the loop if we do move animations for the numbers
+    window.fill((187, 173, 160))
     elements = grid.get_elements()
 
     window.blit(pygame.font.SysFont("arial", 32).render("Generation size: " + str(SETTINGS['GENERATIONS']), 1, COLORS["GREY"]), ( 375, 8))
